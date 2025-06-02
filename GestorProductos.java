@@ -136,27 +136,129 @@ public class GestorProductos {
             System.out.println();
         }
         
-        // Mostrar productos registrados usando Iterator
-        System.out.println("=== PRODUCTOS REGISTRADOS ===\n");
-        
-        if (productos.isEmpty()) {
-            System.out.println("No hay productos registrados.");
-        } else {
-            // Usar Iterator para recorrer la colección
-            Iterator<Producto> iterator = productos.iterator();
-            int contador = 1;
-            
-            while (iterator.hasNext()) {
-                Producto producto = iterator.next();
-                System.out.println("Producto " + contador + ":");
-                System.out.println(producto.toString());
-                System.out.println("-".repeat(50));
-                contador++;
-            }
-            
-            System.out.println("Total de productos registrados: " + productos.size());
-        }
+        // Mostrar productos como factura usando Iterator
+        mostrarFactura(productos);
         
         scanner.close();
+    }
+    
+    /**
+     * Método para mostrar los productos en formato de factura usando Iterator
+     */
+    public static void mostrarFactura(ArrayList<Producto> productos) {
+        System.out.println("════════════════════════════════════════════════════════════");
+        System.out.println("                         FACTURA DE VENTA                    ");
+        System.out.println("════════════════════════════════════════════════════════════");
+        System.out.println("Empresa: TechStore Solutions                                 ");
+        System.out.println("RNC: 101-12345-6                                           ");
+        System.out.println("Dirección: Av. Principal #123, San Salvador                ");
+        System.out.println("Teléfono: (503) 2222-3333                                 ");
+        System.out.println("════════════════════════════════════════════════════════════");
+        
+        // Fecha actual simulada
+        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+        java.util.Date fechaActual = new java.util.Date();
+        System.out.println("Fecha: " + sdf.format(fechaActual));
+        System.out.println("Factura No: FAC-" + String.format("%06d", (int)(Math.random() * 999999 + 1)));
+        System.out.println("Cajero: Sistema Automático");
+        System.out.println();
+        
+        if (productos.isEmpty()) {
+            System.out.println("                    No hay productos registrados");
+            System.out.println("════════════════════════════════════════════════════════════");
+            return;
+        }
+        
+        // Encabezado de la tabla
+        System.out.println("CANT  DESCRIPCIÓN                    MARCA           PRECIO");
+        System.out.println("------------------------------------------------------------");
+        
+        // Variables para totales
+        double subtotal = 0.0;
+        int totalItems = 0;
+        
+        // Usar Iterator para recorrer los productos
+        Iterator<Producto> iterator = productos.iterator();
+        while (iterator.hasNext()) {
+            Producto producto = iterator.next();
+            
+            // Formatear línea de producto
+            System.out.printf("%-5d %-30s %-15s $%8.2f\n", 
+                1, // Cantidad fija de 1
+                producto.getNombre().length() > 30 ? 
+                    producto.getNombre().substring(0, 27) + "..." : producto.getNombre(),
+                producto.getMarca().length() > 15 ? 
+                    producto.getMarca().substring(0, 12) + "..." : producto.getMarca(),
+                producto.getPrecio()
+            );
+            
+            subtotal += producto.getPrecio();
+            totalItems++;
+        }
+        
+        // Línea separadora
+        System.out.println("------------------------------------------------------------");
+        
+        // Calcular impuestos y total
+        double impuesto = subtotal * 0.13; // IVA 13% para El Salvador
+        double total = subtotal + impuesto;
+        
+        // Mostrar totales
+        System.out.printf("Subtotal (%d items):                           $%8.2f\n", totalItems, subtotal);
+        System.out.printf("IVA (13%%):                                     $%8.2f\n", impuesto);
+        System.out.println("------------------------------------------------------------");
+        System.out.printf("TOTAL A PAGAR:                                $%8.2f\n", total);
+        System.out.println("════════════════════════════════════════════════════════════");
+        
+        // Información adicional
+        System.out.println("Forma de pago: Efectivo");
+        System.out.println("Estado: PAGADO");
+        System.out.println();
+        System.out.println("              ¡Gracias por su compra!");
+        System.out.println("           Conserve este comprobante");
+        System.out.println("════════════════════════════════════════════════════════════");
+        System.out.println();
+        
+        // Resumen estadístico usando Iterator
+        mostrarResumenVenta(productos, subtotal, impuesto, total);
+    }
+    
+    /**
+     * Método para mostrar resumen de la venta
+     */
+    public static void mostrarResumenVenta(ArrayList<Producto> productos, double subtotal, double impuesto, double total) {
+        System.out.println("=== RESUMEN DE LA VENTA ===");
+        
+        if (productos.isEmpty()) return;
+        
+        // Encontrar producto más caro y más barato usando Iterator
+        Iterator<Producto> iterator = productos.iterator();
+        Producto productoMasCaro = iterator.next();
+        Producto productoMasBarato = productoMasCaro;
+        
+        // Reiniciar iterator
+        iterator = productos.iterator();
+        while (iterator.hasNext()) {
+            Producto producto = iterator.next();
+            
+            if (producto.getPrecio() > productoMasCaro.getPrecio()) {
+                productoMasCaro = producto;
+            }
+            
+            if (producto.getPrecio() < productoMasBarato.getPrecio()) {
+                productoMasBarato = producto;
+            }
+        }
+        
+        double promedio = subtotal / productos.size();
+        
+        System.out.printf("• Artículos vendidos: %d\n", productos.size());
+        System.out.printf("• Precio promedio: $%.2f\n", promedio);
+        System.out.printf("• Artículo más caro: %s ($%.2f)\n", productoMasCaro.getNombre(), productoMasCaro.getPrecio());
+        System.out.printf("• Artículo más barato: %s ($%.2f)\n", productoMasBarato.getNombre(), productoMasBarato.getPrecio());
+        System.out.printf("• Subtotal: $%.2f\n", subtotal);
+        System.out.printf("• IVA recaudado: $%.2f\n", impuesto);
+        System.out.printf("• Total facturado: $%.2f\n", total);
+        System.out.println("════════════════════════════════════════════════════════════");
     }
 }
